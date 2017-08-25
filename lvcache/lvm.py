@@ -93,12 +93,19 @@ class LogicalVolume(object):
 
         status = dict(zip(cache_status_fields,
                           status.strip().split()[:len(cache_status_fields)]))
+        status['read_hits_ratio'] = \
+            100 * float(status['read_hits']) / (float(status['read_hits']) +
+                                                float(status['read_misses']))
+        status['write_hits_ratio'] = \
+            100 * float(status['write_hits']) / (float(status['write_hits']) +
+                                                 float(status['write_misses']))
         for k in status.keys():
-            if status[k].isdigit():
-                status[k] = int(status[k])
-            elif '/' in status[k]:
-                a, b = [int(x) for x in status[k].split('/')]
-                status['%s_pct' % k] = (a*1.0/b*1.0)*100
+            if isinstance(status[k], basestring):
+                if status[k].isdigit():
+                    status[k] = int(status[k])
+                elif '/' in status[k]:
+                    a, b = [int(x) for x in status[k].split('/')]
+                    status['%s_pct' % k] = (a*1.0/b*1.0)*100
 
         return status
 
